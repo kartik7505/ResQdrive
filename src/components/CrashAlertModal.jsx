@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, Mic, PhoneCall, CheckCircle } from 'lucide-react';
 import useStore from '../store/useStore';
 
 const CrashAlertModal = () => {
-  const { 
-    crashAlertActive, 
-    countdown, 
-    setCountdown, 
-    respondOkay, 
-    respondHelp, 
-    endCountdown 
+  const {
+    crashAlertActive,
+    countdown,
+    setCountdown,
+    respondOkay,
+    respondHelp,
+    endCountdown
   } = useStore();
   const navigate = useNavigate();
   const [isListening, setIsListening] = useState(false);
@@ -29,46 +29,78 @@ const CrashAlertModal = () => {
     return () => clearInterval(timer);
   }, [crashAlertActive, countdown, setCountdown, endCountdown, navigate]);
 
+  const handleOkay = useCallback(() => {
+    window.speechSynthesis.cancel();
+    respondOkay();
+    navigate('/nearby');
+  }, [respondOkay, navigate]);
+
+  const handleHelp = useCallback(() => {
+    window.speechSynthesis.cancel();
+    respondHelp();
+    navigate('/emergency');
+  }, [respondHelp, navigate]);
+
   // Voice Prompt Simulation (Web Speech API)
   useEffect(() => {
+    let recognition = null;
     if (crashAlertActive) {
       const text = "Possible collision detected. Are you okay? Say I am okay, or need help.";
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.onend = () => {
         setIsListening(true);
-        // Here we would initialize SpeechRecognition in a real app.
+        
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+          recognition = new SpeechRecognition();
+          recognition.continuous = false;
+          recognition.interimResults = false;
+          
+          recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript.toLowerCase();
+            if (transcript.includes('okay') || transcript.includes('ok') || transcript.includes('fine')) {
+              handleOkay();
+            } else if (transcript.includes('help') || transcript.includes('emergency')) {
+              handleHelp();
+            }
+          };
+          
+          recognition.onend = () => {
+            setIsListening(false);
+          };
+          
+          try {
+            recognition.start();
+          } catch(e) {
+            console.error(e);
+          }
+        }
       };
       window.speechSynthesis.speak(utterance);
     } else {
       window.speechSynthesis.cancel();
+      if (recognition) recognition.stop();
       setIsListening(false);
     }
-  }, [crashAlertActive]);
 
-  const handleOkay = () => {
-    window.speechSynthesis.cancel();
-    respondOkay();
-    navigate('/nearby');
-  };
-
-  const handleHelp = () => {
-    window.speechSynthesis.cancel();
-    respondHelp();
-    navigate('/emergency');
-  };
+    return () => {
+      window.speechSynthesis.cancel();
+      if (recognition) recognition.stop();
+    };
+  }, [crashAlertActive, handleOkay, handleHelp]);
 
   return (
     <AnimatePresence>
       {crashAlertActive && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 bg-rose-950/80 backdrop-blur-md"
           />
-          
-          <motion.div 
+
+          <motion.div
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -82,27 +114,27 @@ const CrashAlertModal = () => {
                 <div className="absolute inset-0 rounded-full border-4 border-rose-500 border-t-transparent animate-spin"></div>
                 <AlertTriangle className="w-12 h-12 text-rose-500" />
               </div>
-              
+
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
                 Possible Collision Detected
               </h2>
               <p className="text-xl text-slate-300 mb-8">
                 Are you okay? Emergency services will be contacted in
               </p>
-              
+
               <div className="text-7xl font-bold text-rose-500 mb-8 font-mono">
                 {countdown}
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 w-full">
-                <button 
+                <button
                   onClick={handleOkay}
                   className="flex-1 py-4 md:py-5 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl font-bold text-lg md:text-xl transition-colors flex items-center justify-center gap-3 border border-slate-700 hover:border-slate-500"
                 >
                   <CheckCircle className="w-6 h-6 text-emerald-500" />
                   I'M OKAY
                 </button>
-                <button 
+                <button
                   onClick={handleHelp}
                   className="flex-1 py-4 md:py-5 bg-rose-600 hover:bg-rose-500 text-white rounded-2xl font-bold text-lg md:text-xl transition-all flex items-center justify-center gap-3 shadow-[0_0_20px_-5px_rgba(225,29,72,0.5)] hover:shadow-[0_0_40px_-5px_rgba(225,29,72,0.8)]"
                 >

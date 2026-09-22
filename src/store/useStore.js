@@ -14,12 +14,25 @@ const useStore = create((set) => ({
   setSpeed: (speed) => set({ speed }),
   setCoordinates: (coordinates) => set({ coordinates }),
   
-  triggerCrash: () => set({ 
-    crashAlertActive: true, 
-    crashState: 'alert',
-    countdown: 20,
-    systemStatus: 'Collision Detected'
-  }),
+  triggerCrash: () => {
+    // Send Real SMS using Textbelt (1 free per day)
+    fetch('https://textbelt.com/text', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        phone: '+918958990342',
+        message: 'ResQDrive ALERT: Vehicle Collision Detected! Immediate assistance may be required.',
+        key: 'textbelt',
+      }),
+    }).then(res => res.json()).then(data => console.log('SMS Status:', data));
+
+    set({ 
+      crashAlertActive: true, 
+      crashState: 'alert',
+      countdown: 20,
+      systemStatus: 'Collision Detected'
+    });
+  },
   
   respondOkay: () => set({ 
     crashAlertActive: false, 
@@ -44,7 +57,7 @@ const useStore = create((set) => ({
   profile: {
     name: 'Rahul Sharma',
     bloodGroup: 'B+',
-    emergencyContact: '+91 98765 43210',
+    emergencyContact: '+91 8958990342',
     vehicleNumber: 'DL-01-AB-1234'
   },
   
