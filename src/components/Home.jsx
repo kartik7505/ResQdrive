@@ -36,7 +36,7 @@ const Home = () => {
           <span className="text-2xl font-bold tracking-tight text-white">ResQdrive</span>
         </div>
         <button
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/login')}
           className="text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-full transition-colors border border-slate-700"
         >
           Sign In
@@ -72,7 +72,7 @@ const Home = () => {
             
             <div className="flex flex-wrap items-center gap-4 pt-4">
               <button
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/login')}
                 className="group relative px-8 py-4 bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-full overflow-hidden transition-all shadow-[0_0_40px_-10px_rgba(225,29,72,0.6)]"
               >
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />

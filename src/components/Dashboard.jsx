@@ -7,6 +7,12 @@ const Dashboard = () => {
   const { speed, coordinates, locationStatus, startLocationTracking, isCameraActive, isMicActive, systemStatus, triggerCrash } = useStore();
   const navigate = useNavigate();
   
+  useEffect(() => {
+    if (!localStorage.getItem('resqdrive_token')) {
+      navigate('/login');
+    }
+  }, [navigate]);
+
   const [isSensorActive, setIsSensorActive] = useState(false);
   const [sensorData, setSensorData] = useState({ x: 0, y: 0, z: 0, magnitude: 0 });
 

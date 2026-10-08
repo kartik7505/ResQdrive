@@ -11,6 +11,7 @@ const Profile = lazy(() => import('./components/Profile'));
 const ControlDashboard = lazy(() => import('./components/ControlDashboard'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const CrashAlertModal = lazy(() => import('./components/CrashAlertModal'));
+const Login = lazy(() => import('./components/Login'));
 
 const AnalyticsTracker = () => {
   const location = useLocation();
@@ -71,6 +72,7 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/control" element={<ControlDashboard />} />
               <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/login" element={<Login />} />
             </Routes>
             <CrashAlertModal />
           </Suspense>
