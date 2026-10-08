@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: resqdrive-api-production
+    env: node
+    buildCommand: npm install
+    startCommand: node server/index.js
+    # Automated Build Checks
+    healthCheckPath: /health
+    
+    # Environment config
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: FRONTEND_URL
+        value: https://resqdrive.com
+      - key: VITE_SUPABASE_URL
+        value: https://rkrxcnkldrwiryvdwepv.supabase.co
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false # Requires manual entry in Render dashboard for security
+        
+    # Autoscaling Configuration (Managed Load Balancing)
+    autoScaling:
+      minInstances: 2   # Cold start prevention & high availability
+      maxInstances: 50  # Hard budget limit to prevent unbounded spending and DB exhaustion
+      targetMemoryPercent: 70
+      targetCPUPercent: 60
